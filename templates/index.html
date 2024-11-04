@@ -93,6 +93,48 @@
                color: white;
           }
 
+          .slider-container {
+          width: 50%;
+          display: flex;
+          align-items: center;
+          margin: 20px auto;
+          }
+
+          .slider {
+          flex: 1;
+          margin-right: 10px;
+          -webkit-appearance: none; /* Remove default appearance */
+          appearance: none; /* Remove default appearance */
+          height: 6px;
+          background: #ddd;
+          border-radius: 5px;
+          outline: none; /* Remove outline */
+          }
+
+          .slider::-webkit-slider-thumb {
+          -webkit-appearance: none; /* Remove default appearance */
+          appearance: none; /* Remove default appearance */
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #2c3e50; /* Color of the thumb */
+          cursor: pointer; /* Pointer cursor on hover */
+          }
+
+          .slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #2c3e50; /* Color of the thumb */
+          cursor: pointer; /* Pointer cursor on hover */
+          }
+
+          span {
+          font-weight: bold;
+          font-size: 16px;
+          }
+
+
           /* Responsive Design */
           @media (max-width: 768px) {
                .containerHeader img {
@@ -114,35 +156,105 @@
 
 
           <h1>Video Stream</h1>
-          <img style="width: 60%;" id="video-feed" src="{{ url_for('video_stream') }}" alt="Video Stream">
+          <img style="width: 75%;" id="video-feed" src="{{ url_for('video_stream') }}" alt="Video Stream">
           <br>
           <button id="mode-original">Modo Original</button>
           <button id="mode-sustraccion">Sustracción de Fondo</button>
           <button id="mode-histograma">Ecualización de Histograma</button>
           <button id="mode-clahe">CLAHE</button>
           <button id="homomorphic">Homomorfico</button>
-          <script>
-              $('#mode-original').on('click', function() {
-                  $.get('/set_video_mode/0');
-              });
-      
-              $('#mode-sustraccion').on('click', function() {
-                  $.get('/set_video_mode/1');
-              });
-      
-              $('#mode-histograma').on('click', function() {
-                  $.get('/set_video_mode/2');
-              });
-      
-              $('#mode-clahe').on('click', function() {
-                  $.get('/set_video_mode/3');
-              });
-              
-              $('#homomorphic').on('click', function() {
-                  $.get('/set_video_mode/4');
-              });
-          </script>
+          <button id="salt">Salt and Peper</button>
+          <button id="border-without-filter">Bordes sin Filtros</button>
+          <button id="border-median-filter">Borde con filtro Mediana</button>
+          <button id="border-gaussian-filter">Borde Con filtro Gaussiano</button>
+          <button id="border-blur-filter">Borde Con filtro Blur</button>
 
+          <!-- Contenedor de los trackbars, inicialmente oculto -->
+          <div id="salt-pepper-controls" style="display: none;">
+               <div class="slider-container">
+               <label for="salt-level">Nivel de Sal:</label>
+               <input type="range" id="salt-level" min="0" max="2500" value="100" class="slider">
+               <span id="salt-value">100</span>
+               </div>
+               
+               <div class="slider-container">
+               <label for="pepper-level">Nivel de Pimienta:</label>
+               <input type="range" id="pepper-level" min="0" max="2500" value="100" class="slider">
+               <span id="pepper-value">100</span>
+               </div>
+          </div>
+          <script>
+               // Función para cambiar el modo de video y mostrar/ocultar los controles de sal y pimienta
+               function setVideoMode(modeIndex) {
+                   $.get('/set_video_mode/' + modeIndex);
+           
+                   // Mostrar los controles de sal y pimienta solo si se selecciona el modo "Salt and Peper" (índice 5)
+                   if (modeIndex === 5) {
+                       $('#salt-pepper-controls').show();
+                   } else {
+                       $('#salt-pepper-controls').hide();
+                   }
+               }
+           
+               $('#mode-original').on('click', function() {
+                   setVideoMode(0);
+               });
+           
+               $('#mode-sustraccion').on('click', function() {
+                   setVideoMode(1);
+               });
+           
+               $('#mode-histograma').on('click', function() {
+                   setVideoMode(2);
+               });
+           
+               $('#mode-clahe').on('click', function() {
+                   setVideoMode(3);
+               });
+               
+               $('#homomorphic').on('click', function() {
+                   setVideoMode(4);
+               });
+           
+               $('#salt').on('click', function() {
+                   setVideoMode(5);
+               });
+           
+               $('#border-without-filter').on('click', function() {
+                   setVideoMode(6);
+               });
+           
+               $('#border-median-filter').on('click', function() {
+                   setVideoMode(7);
+               });
+
+               $('#border-gaussian-filter').on('click', function() {
+                   setVideoMode(8);
+               });
+           
+               $('#border-blur-filter').on('click', function() {
+                   setVideoMode(9);
+               });
+           
+               $('#salt-level').on('input', function() {
+                   let noiseLevel = $(this).val();
+                   $.get('/set_salt_level/' + noiseLevel);
+               });
+           
+               $('#pepper-level').on('input', function() {
+                   let noiseLevel = $(this).val();
+                   $.get('/set_pepper_level/' + noiseLevel);
+               });
+
+               // Mostrar el valor actual de los controles deslizantes
+               document.getElementById('salt-level').addEventListener('input', function() {
+                   document.getElementById('salt-value').textContent = this.value;
+               });
+           
+               document.getElementById('pepper-level').addEventListener('input', function() {
+                   document.getElementById('pepper-value').textContent = this.value;
+               });
+           </script>
           <h2 style="text-align: center; margin-top: 30px;">Parte 2</h2>
           <div class="images-container">
                <p style="line-height: 1.5rem; font-size: 1.15rem; font-weight: 400; margin-bottom: 1rem; color: #333;">                    Las operaciones Top y Black Hat resaltan características de bajo 

@@ -13,6 +13,7 @@ import numpy as np
 import requests
 import os
 import time
+import random
 
 app = Flask(__name__)
 # IP Address
@@ -28,23 +29,26 @@ stream_url = ''.join([_URL,SEP,_PORT,_ST])
 images_folder = 'static/imgs'
 
 processed_images = []
+
+salt_level = 100
+pepper_level = 100
+
+
     
 for filename in os.listdir(images_folder):
     if filename.endswith(('.png', '.jpg', '.jpeg', '.webp')):
         image_path = os.path.join(images_folder, filename)
         processed_images.append(image_path)
 
-# Inicializar el sustractor de fondo
 bg_subtractor = cv2.createBackgroundSubtractorMOG2(history=25, varThreshold=20, detectShadows=True)
 use_bg_subtraction = False
 
-modes = ["original", "bg_subtraction", "histogram_eq", "clahe", "homomorphic"]
+modes = ["original", "bg_subtraction", "histogram_eq", "clahe", "homomorphic", "salt_and_peper_noise", "border-without-filter", "border-with-median", "border-with-gaussian", "border-with-blur"]
 current_mode_index = 0
 
 def video_capture():
-    global current_mode_index
     frame_count = 0
-    start_time = time.time()  # Hora de inicio para calcular el FPS
+    start_time = time.time()
     while True:
         try:
             res = requests.get(stream_url, stream=True, timeout=5)
@@ -54,9 +58,12 @@ def video_capture():
                     cv_img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), 1)
                     gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
 
+                    # Variable para almacenar la imagen final que se mostrará
+                    display_img = gray
+
                     # Aplica el modo seleccionado
                     if current_mode_index == 0:
-                        display_img = gray
+                        display_img = cv_img.copy()
                     elif current_mode_index == 1:
                         fg_mask = bg_subtractor.apply(gray)
                         display_img = fg_mask
@@ -67,6 +74,38 @@ def video_capture():
                         display_img = clahe.apply(gray)
                     elif current_mode_index == 4:
                         display_img = homomorphic_filter(gray)
+                    elif current_mode_index == 5:
+                        # Modo para mostrar la cuadrícula de 4 versiones cuando está seleccionado "sal y pimienta"
+                        noisy_img = salt_pepper_noise(cv_img.copy(), salt_level, pepper_level)
+                        median_filtered = median_filter(noisy_img)
+                        gaussian_filtered = gaussian_filter(noisy_img)
+                        blurred = apply_blur(noisy_img)
+
+                        # Crear una cuadrícula de 2x2 con las imágenes
+                        top_row = np.hstack((noisy_img, median_filtered))
+                        bottom_row = np.hstack((gaussian_filtered, blurred))
+                        display_img = np.vstack((top_row, bottom_row))
+
+                    elif current_mode_index == 6:
+                        canny_edge = canny_edge_detection(gray)
+                        sobel_edge = sobel_edge_detection(gray)
+                        display_img = np.hstack((canny_edge, sobel_edge))
+                    elif current_mode_index == 7:
+                        median_filtered = median_filter(gray)
+                        canny_edge = canny_edge_detection(median_filtered)
+                        sobel_edge = sobel_edge_detection(median_filtered)
+                        display_img = np.hstack((canny_edge, sobel_edge))
+                    elif current_mode_index == 8:
+                        gaussian_filtered = gaussian_filter(gray)
+                        canny_edge = canny_edge_detection(gaussian_filtered)
+                        sobel_edge = sobel_edge_detection(gaussian_filtered)
+                        display_img = np.hstack((canny_edge, sobel_edge))
+                    elif current_mode_index == 9:
+                        blurred = apply_blur(gray)
+                        canny_edge = canny_edge_detection(blurred)
+                        sobel_edge = sobel_edge_detection(blurred)
+                        display_img = np.hstack((canny_edge, sobel_edge))
+                        
 
                     # Añadir FPS al frame
                     frame_count += 1
@@ -93,17 +132,79 @@ def video_capture():
             print("Error en la conexión:", e)
             continue  # Intentar reconectar si hay un error
 
+
+def canny_edge_detection(img):
+    return cv2.Canny(img, 100, 100*1.3, 3)
+
+def sobel_edge_detection(img):
+    sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+    sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+    sobel_magnitude = cv2.magnitude(sobel_x, sobel_y)
+    return np.uint8(sobel_magnitude)
+
+def salt_pepper_noise(img, salt_level, pepper_level):
+    # Verificar si la imagen es en color o en escala de grises
+    if len(img.shape) == 3:
+        height, width, _ = img.shape
+    else:
+        height, width = img.shape
+
+    # Añadir ruido de sal y pimienta
+    xs = np.random.randint(0, width, salt_level)
+    ys = np.random.randint(0, height, salt_level)
+    xp = np.random.randint(0, width, pepper_level)
+    yp = np.random.randint(0, height, pepper_level)
+
+    # Si es en color, aplicar a cada canal
+    if len(img.shape) == 3:
+        img[ys, xs, :] = 255  # Sal
+        img[yp, xp, :] = 0    # Pimienta
+    else:
+        img[ys, xs] = 255
+        img[yp, xp] = 0
+
+    return img
+
+def median_filter(img):
+    if len(img.shape) == 3:
+        # Aplicar filtro de mediana a cada canal de color y luego combinar
+        channels = cv2.split(img)
+        channels = [cv2.medianBlur(channel, 15) for channel in channels]
+        return cv2.merge(channels)
+    else:
+        # Aplicar filtro de mediana para escala de grises
+        return cv2.medianBlur(img, 15)
+
+def gaussian_filter(img):
+    ksize = (5, 5)
+    sigma = 1.5
+    if len(img.shape) == 3:
+        # Aplicar filtro gaussiano a cada canal de color y luego combinar
+        channels = cv2.split(img)
+        channels = [cv2.GaussianBlur(channel, ksize, sigma) for channel in channels]
+        return cv2.merge(channels)
+    else:
+        return cv2.GaussianBlur(img, ksize, sigma)
+
+def apply_blur(img):
+    ksize = (9, 9)
+    if len(img.shape) == 3:
+        # Aplicar desenfoque a cada canal de color y luego combinar
+        channels = cv2.split(img)
+        channels = [cv2.blur(channel, ksize) for channel in channels]
+        return cv2.merge(channels)
+    else:
+        return cv2.blur(img, ksize)
+
+
 def homomorphic_filter(image, low_gamma=0.5, high_gamma=2.0, sigma=30):
-    # Reducir resolución para optimización
-    scale = 0.5  # Escala del 50%
+    scale = 0.5
     small_image = cv2.resize(image, (0, 0), fx=scale, fy=scale)
     image_log = np.log1p(np.array(small_image, dtype="float"))
 
-    # Transformada de Fourier y su desplazamiento
     dft = np.fft.fft2(image_log)
     dft_shift = np.fft.fftshift(dft)
 
-    # Crear máscara gaussiana precomputada
     rows, cols = small_image.shape
     crow, ccol = rows // 2, cols // 2
     mask = np.ones((rows, cols), dtype=np.float32)
@@ -112,13 +213,11 @@ def homomorphic_filter(image, low_gamma=0.5, high_gamma=2.0, sigma=30):
             d = np.sqrt((i - crow) ** 2 + (j - ccol) ** 2)
             mask[i, j] = (high_gamma - low_gamma) * (1 - np.exp(-((d ** 2) / (2 * (sigma ** 2))))) + low_gamma
 
-    # Aplicar la máscara
     dft_shift_filtered = dft_shift * mask
     dft_inverse = np.fft.ifftshift(dft_shift_filtered)
     img_back = np.fft.ifft2(dft_inverse)
     img_back = np.expm1(np.abs(img_back))
 
-    # Normalizar y redimensionar al tamaño original
     img_back = cv2.normalize(img_back, None, 0, 255, cv2.NORM_MINMAX)
     img_back = np.array(img_back, dtype="uint8")
     img_back = cv2.resize(img_back, (image.shape[1], image.shape[0]))
@@ -219,6 +318,17 @@ def set_video_mode(mode_index):
     else:
         return "Índice de modo no válido", 400  # Respuesta de error si el índice es inválido
 
+@app.route('/set_salt_level/<int:level>', methods=['GET'])
+def set_salt_level(level):
+    global salt_level
+    salt_level = level
+    return "Nivel de sal y pimienta ajustado a " + str(level)
+
+@app.route('/set_pepper_level/<int:level>', methods=['GET'])
+def set_pepper_level(level):
+    global pepper_level
+    pepper_level = level
+    return "Nivel de sal y pimienta ajustado a " + str(level)
 
 if __name__ == "__main__":
     app.run(debug=True)
