@@ -4,29 +4,214 @@
      <meta charset="UTF-8">
      <meta http-equiv="X-UA-Compatible" content="IE=edge">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Videostreaming ESP32-CAM</title>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
      <style>
-          .container{
+          /* General Styles */
+          * {
+               box-sizing: border-box;
                margin: 0;
                padding: 0;
-               width: 100%;
-               height: 100vh;
-               background-color: #f1f1bc;
-               color: black;
-               text-align: center;
+               font-family: Arial, sans-serif;
           }
-          .containerHeader{
+          body {
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               min-height: 100vh;
+               background-color: #f0f0f0;
+               color: #333;
+          }
+          .container {
+               width: 90%;
+               max-width: 1200px;
+               text-align: center;
+               padding: 20px;
+               background-color: #ffffff;
+               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+               border-radius: 8px;
+          }
+
+          /* Header Section */
+          .containerHeader {
+               margin-bottom: 20px;
+          }
+          .containerHeader h1 {
+               font-size: 2em;
+               margin-bottom: 10px;
+               color: #2c3e50;
+          }
+          .containerHeader h2 {
+               font-size: 1.5em;
+               margin-bottom: 20px;
+               color: #7f8c8d;
+          }
+          .containerHeader img {
+               width: 70%;
+               max-width: 600px;
+               border-radius: 8px;
+          }
+
+
+          /* Images Section */
+          .images-container {
                display: flex;
                flex-direction: column;
-               align-items: center;
+               gap: 20px;
+               margin-top: 30px;
+          }
+          .images-row {
+               display: flex;
+               gap: 20px;
+               justify-content: center;
+               flex-wrap: wrap;
+          }
+          .container-imgs {
+               flex: 1;
+               max-width: 45%;
+               padding: 10px;
+               background-color: #f9f9f9;
+               border-radius: 8px;
+               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          .container-imgs img {
+               width: 100%;
+               border-radius: 8px;
+          }
+
+          button{
+               padding: 15px 25px;
+               margin: 10px;
+               border: none;
+               border-radius: 5px;
+               transition: all 0.3s;
+               font-size: 17px;
+               cursor: pointer;
+          }
+          button:hover{
+               background-color: #2c3e50;
+               color: white;
+          }
+
+          /* Responsive Design */
+          @media (max-width: 768px) {
+               .containerHeader img {
+                    width: 70%;
+               }
+               .images-row {
+                    flex-direction: column;
+                    gap: 10px;
+               }
           }
      </style>
-     <title>Videostreaming ESP32-CAM</title>
 </head>
-<body class = "container">
-     <div class="containerHeader">
-          <h1>Video Streaming</h1>
-          <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
+<body>
+     <div class="container">
+          <div class="containerHeader">
+               <h1>Práctica 2 - Visión por Computador</h1>
+               <h2>Anthony Moya Ochoa</h2>
+          </div>
+
+
+          <h1>Video Stream</h1>
+          <img style="width: 60%;" id="video-feed" src="{{ url_for('video_stream') }}" alt="Video Stream">
+          <br>
+          <button id="mode-original">Modo Original</button>
+          <button id="mode-sustraccion">Sustracción de Fondo</button>
+          <button id="mode-histograma">Ecualización de Histograma</button>
+          <button id="mode-clahe">CLAHE</button>
+          <button id="homomorphic">Homomorfico</button>
+          <script>
+              $('#mode-original').on('click', function() {
+                  $.get('/set_video_mode/0');
+              });
+      
+              $('#mode-sustraccion').on('click', function() {
+                  $.get('/set_video_mode/1');
+              });
+      
+              $('#mode-histograma').on('click', function() {
+                  $.get('/set_video_mode/2');
+              });
+      
+              $('#mode-clahe').on('click', function() {
+                  $.get('/set_video_mode/3');
+              });
+              
+              $('#homomorphic').on('click', function() {
+                  $.get('/set_video_mode/4');
+              });
+          </script>
+
+          <h2 style="text-align: center; margin-top: 30px;">Parte 2</h2>
+          <div class="images-container">
+               <p style="line-height: 1.5rem; font-size: 1.15rem; font-weight: 400; margin-bottom: 1rem; color: #333;">                    Las operaciones Top y Black Hat resaltan características de bajo 
+                    contraste en la imagen original al realzar los bordes de los objetos y las 
+                    diferencias entre zonas brillantes y oscuras, esto facilita la detección  
+                    de detalles finos que, en la imagen original, pueden pasar desapercibidos debido a la falta de contraste. <br>
+                    Ademas, la combinación de la imagen original con el resultado de la operación 
+                    Top Hat−Black Hat ofrece una imagen de mayor contraste
+                    donde se destacan tanto las áreas claras como las oscuras, equilibrando 
+                    la luminosidad general, lo que permite que las áreas sean más visibles 
+                    y que detalles ocultos en la imagen original se vuelvan mas claros, mejorando la imagen y su interpretacion.
+               </p>
+               <div class="images-row original-images">
+                    <div class="container-imgs">
+                         <p>Original</p>
+                         <img src="{{ url_for('static', filename='imgs/brain-mri.jpeg') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Black Hat</p>
+                         <img src="{{ url_for('static', filename='brain-mri/black_hat/black_hat_iter_1_kernel_34x34.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Top Hat</p>
+                         <img src="{{ url_for('static', filename='brain-mri/top_hat/top_hat_iter_1_kernel_34x34.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Mejorada</p>
+                         <img src="{{ url_for('static', filename='brain-mri/best_contrast_enhanced/best_contrast_enhanced_iter_1_kernel_34x34.png') }}" alt="Image COVID-2">
+                         <p> kernel_34x34 </p>
+                    </div>
+               </div>
+               <div class="images-row modified-images">
+                    <div class="container-imgs">
+                         <p>Original</p>
+                         <img src="{{ url_for('static', filename='imgs/head-xray.jpg') }}" alt="Modified Image 1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Black Hat</p>
+                         <img src="{{ url_for('static', filename='head-xray/black_hat/black_hat_iter_4_kernel_46x46.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Top Hat</p>
+                         <img src="{{ url_for('static', filename='head-xray/top_hat/top_hat_iter_4_kernel_46x46.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Mejorada</p>
+                         <img src="{{ url_for('static', filename='head-xray/best_contrast_enhanced/best_contrast_enhanced_iter_4_kernel_46x46.png') }}" alt="Modified Image 2">
+                         <p>Kernel 46x46</p>
+                    </div>
+               </div>
+               <div class="images-row modified-images">
+                    <div class="container-imgs">
+                         <p>Original</p>
+                         <img src="{{ url_for('static', filename='imgs/torax-xray.png') }}" alt="Modified Image 1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Black Hat</p>
+                         <img src="{{ url_for('static', filename='torax-xray/black_hat/black_hat_iter_3_kernel_42x42.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Top Hat</p>
+                         <img src="{{ url_for('static', filename='torax-xray/top_hat/top_hat_iter_3_kernel_42x42.png') }}" alt="Image COVID-1">
+                    </div>
+                    <div class="container-imgs">
+                         <p>Mejorada</p>
+                         <img src="{{ url_for('static', filename='torax-xray/best_contrast_enhanced/best_contrast_enhanced_iter_3_kernel_42x42.png') }}" alt="Modified Image 2">
+                         <p>Kernel 42x42</p>
+                    </div>
+               </div>
+          </div>
      </div>
-     <img src="{{ url_for('video_stream') }}">
-</body>
 </html>
