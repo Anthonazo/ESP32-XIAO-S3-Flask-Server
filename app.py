@@ -58,10 +58,8 @@ def video_capture():
                     cv_img = cv2.imdecode(np.frombuffer(img_data.read(), np.uint8), 1)
                     gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
 
-                    # Variable para almacenar la imagen final que se mostrará
                     display_img = gray
 
-                    # Aplica el modo seleccionado
                     if current_mode_index == 0:
                         display_img = cv_img.copy()
                     elif current_mode_index == 1:
@@ -75,13 +73,11 @@ def video_capture():
                     elif current_mode_index == 4:
                         display_img = homomorphic_filter(gray)
                     elif current_mode_index == 5:
-                        # Modo para mostrar la cuadrícula de 4 versiones cuando está seleccionado "sal y pimienta"
                         noisy_img = salt_pepper_noise(cv_img.copy(), salt_level, pepper_level)
                         median_filtered = median_filter(noisy_img)
                         gaussian_filtered = gaussian_filter(noisy_img)
                         blurred = apply_blur(noisy_img)
 
-                        # Crear una cuadrícula de 2x2 con las imágenes
                         top_row = np.hstack((noisy_img, median_filtered))
                         bottom_row = np.hstack((gaussian_filtered, blurred))
                         display_img = np.vstack((top_row, bottom_row))
@@ -123,14 +119,13 @@ def video_capture():
                            b'Content-Type: image/jpeg\r\n\r\n' +
                            bytearray(encodedImage) + b'\r\n')
 
-                    # Reinicia el contador de FPS cada segundo
                     if elapsed_time >= 1.0:
                         frame_count = 0
                         start_time = time.time()
 
         except requests.exceptions.RequestException as e:
             print("Error en la conexión:", e)
-            continue  # Intentar reconectar si hay un error
+            continue 
 
 
 def canny_edge_detection(img):
@@ -143,19 +138,16 @@ def sobel_edge_detection(img):
     return np.uint8(sobel_magnitude)
 
 def salt_pepper_noise(img, salt_level, pepper_level):
-    # Verificar si la imagen es en color o en escala de grises
     if len(img.shape) == 3:
         height, width, _ = img.shape
     else:
         height, width = img.shape
 
-    # Añadir ruido de sal y pimienta
     xs = np.random.randint(0, width, salt_level)
     ys = np.random.randint(0, height, salt_level)
     xp = np.random.randint(0, width, pepper_level)
     yp = np.random.randint(0, height, pepper_level)
 
-    # Si es en color, aplicar a cada canal
     if len(img.shape) == 3:
         img[ys, xs, :] = 255  # Sal
         img[yp, xp, :] = 0    # Pimienta
@@ -167,19 +159,16 @@ def salt_pepper_noise(img, salt_level, pepper_level):
 
 def median_filter(img):
     if len(img.shape) == 3:
-        # Aplicar filtro de mediana a cada canal de color y luego combinar
         channels = cv2.split(img)
         channels = [cv2.medianBlur(channel, 15) for channel in channels]
         return cv2.merge(channels)
     else:
-        # Aplicar filtro de mediana para escala de grises
         return cv2.medianBlur(img, 15)
 
 def gaussian_filter(img):
     ksize = (5, 5)
     sigma = 1.5
     if len(img.shape) == 3:
-        # Aplicar filtro gaussiano a cada canal de color y luego combinar
         channels = cv2.split(img)
         channels = [cv2.GaussianBlur(channel, ksize, sigma) for channel in channels]
         return cv2.merge(channels)
@@ -189,7 +178,6 @@ def gaussian_filter(img):
 def apply_blur(img):
     ksize = (9, 9)
     if len(img.shape) == 3:
-        # Aplicar desenfoque a cada canal de color y luego combinar
         channels = cv2.split(img)
         channels = [cv2.blur(channel, ksize) for channel in channels]
         return cv2.merge(channels)
@@ -307,16 +295,15 @@ def video_stream():
     return Response(video_capture(),
                     mimetype="multipart/x-mixed-replace; boundary=frame")
 
-# Ruta para cambiar el modo de video
 @app.route("/set_video_mode/<int:mode_index>")
 def set_video_mode(mode_index):
     global current_mode_index
     if 0 <= mode_index < len(modes):
         current_mode_index = mode_index
         print(f"Modo de video cambiado a: {modes[current_mode_index]}")
-        return '', 204  # Respuesta vacía con código 204
+        return '', 204 
     else:
-        return "Índice de modo no válido", 400  # Respuesta de error si el índice es inválido
+        return "Índice de modo no válido", 400  
 
 @app.route('/set_salt_level/<int:level>', methods=['GET'])
 def set_salt_level(level):

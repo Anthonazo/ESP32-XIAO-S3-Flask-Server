@@ -103,30 +103,30 @@
           .slider {
           flex: 1;
           margin-right: 10px;
-          -webkit-appearance: none; /* Remove default appearance */
-          appearance: none; /* Remove default appearance */
+          -webkit-appearance: none;
+          appearance: none; 
           height: 6px;
           background: #ddd;
           border-radius: 5px;
-          outline: none; /* Remove outline */
+          outline: none;
           }
 
           .slider::-webkit-slider-thumb {
-          -webkit-appearance: none; /* Remove default appearance */
-          appearance: none; /* Remove default appearance */
+          -webkit-appearance: none; 
+          appearance: none; 
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #2c3e50; /* Color of the thumb */
-          cursor: pointer; /* Pointer cursor on hover */
+          background: #2c3e50;
+          cursor: pointer;
           }
 
           .slider::-moz-range-thumb {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #2c3e50; /* Color of the thumb */
-          cursor: pointer; /* Pointer cursor on hover */
+          background: #2c3e50; 
+          cursor: pointer;
           }
 
           span {
@@ -135,7 +135,6 @@
           }
 
 
-          /* Responsive Design */
           @media (max-width: 768px) {
                .containerHeader img {
                     width: 70%;
@@ -169,7 +168,6 @@
           <button id="border-gaussian-filter">Borde Con filtro Gaussiano</button>
           <button id="border-blur-filter">Borde Con filtro Blur</button>
 
-          <!-- Contenedor de los trackbars, inicialmente oculto -->
           <div id="salt-pepper-controls" style="display: none;">
                <div class="slider-container">
                <label for="salt-level">Nivel de Sal:</label>
@@ -184,11 +182,9 @@
                </div>
           </div>
           <script>
-               // Función para cambiar el modo de video y mostrar/ocultar los controles de sal y pimienta
                function setVideoMode(modeIndex) {
                    $.get('/set_video_mode/' + modeIndex);
            
-                   // Mostrar los controles de sal y pimienta solo si se selecciona el modo "Salt and Peper" (índice 5)
                    if (modeIndex === 5) {
                        $('#salt-pepper-controls').show();
                    } else {
@@ -270,58 +266,58 @@
                <div class="images-row original-images">
                     <div class="container-imgs">
                          <p>Original</p>
-                         <img src="{{ url_for('static', filename='imgs/brain-mri.jpeg') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='imgs/chest1.jpeg') }}" alt="Image COVID-1">
                     </div>
                     <div class="container-imgs">
                          <p>Black Hat</p>
-                         <img src="{{ url_for('static', filename='brain-mri/black_hat/black_hat_iter_1_kernel_34x34.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest1/black_hat/black_hat_iter_1_kernel_34x34.png') }}" alt="Image 1">
                     </div>
                     <div class="container-imgs">
                          <p>Top Hat</p>
-                         <img src="{{ url_for('static', filename='brain-mri/top_hat/top_hat_iter_1_kernel_34x34.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest1/top_hat/top_hat_iter_1_kernel_34x34.png') }}" alt="Image 1">
                     </div>
                     <div class="container-imgs">
                          <p>Mejorada</p>
-                         <img src="{{ url_for('static', filename='brain-mri/best_contrast_enhanced/best_contrast_enhanced_iter_1_kernel_34x34.png') }}" alt="Image COVID-2">
+                         <img src="{{ url_for('static', filename='chest1/best_contrast_enhanced/best_contrast_enhanced_iter_1_kernel_34x34.png') }}" alt="Image COVID-2">
                          <p> kernel_34x34 </p>
                     </div>
                </div>
                <div class="images-row modified-images">
                     <div class="container-imgs">
                          <p>Original</p>
-                         <img src="{{ url_for('static', filename='imgs/head-xray.jpg') }}" alt="Modified Image 1">
+                         <img src="{{ url_for('static', filename='imgs/chest2.jpeg') }}" alt="Modified Image 1">
                     </div>
                     <div class="container-imgs">
                          <p>Black Hat</p>
-                         <img src="{{ url_for('static', filename='head-xray/black_hat/black_hat_iter_4_kernel_46x46.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest2/black_hat/black_hat_iter_5_kernel_50x50.png') }}" alt="Image COVID-1">
                     </div>
                     <div class="container-imgs">
                          <p>Top Hat</p>
-                         <img src="{{ url_for('static', filename='head-xray/top_hat/top_hat_iter_4_kernel_46x46.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest2/top_hat/top_hat_iter_5_kernel_50x50.png') }}" alt="Image COVID-1">
                     </div>
                     <div class="container-imgs">
                          <p>Mejorada</p>
-                         <img src="{{ url_for('static', filename='head-xray/best_contrast_enhanced/best_contrast_enhanced_iter_4_kernel_46x46.png') }}" alt="Modified Image 2">
-                         <p>Kernel 46x46</p>
+                         <img src="{{ url_for('static', filename='chest2/best_contrast_enhanced/best_contrast_enhanced_iter_5_kernel_50x50.png') }}" alt="Modified Image 2">
+                         <p>Kernel 50x50</p>
                     </div>
                </div>
                <div class="images-row modified-images">
                     <div class="container-imgs">
                          <p>Original</p>
-                         <img src="{{ url_for('static', filename='imgs/torax-xray.png') }}" alt="Modified Image 1">
+                         <img src="{{ url_for('static', filename='imgs/chest3.jpeg') }}" alt="Modified Image 1">
                     </div>
                     <div class="container-imgs">
                          <p>Black Hat</p>
-                         <img src="{{ url_for('static', filename='torax-xray/black_hat/black_hat_iter_3_kernel_42x42.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest3/black_hat/black_hat_iter_2_kernel_38x38.png') }}" alt="Image COVID-1">
                     </div>
                     <div class="container-imgs">
                          <p>Top Hat</p>
-                         <img src="{{ url_for('static', filename='torax-xray/top_hat/top_hat_iter_3_kernel_42x42.png') }}" alt="Image COVID-1">
+                         <img src="{{ url_for('static', filename='chest3/top_hat/top_hat_iter_2_kernel_38x38.png') }}" alt="Image COVID-1">
                     </div>
                     <div class="container-imgs">
                          <p>Mejorada</p>
-                         <img src="{{ url_for('static', filename='torax-xray/best_contrast_enhanced/best_contrast_enhanced_iter_3_kernel_42x42.png') }}" alt="Modified Image 2">
-                         <p>Kernel 42x42</p>
+                         <img src="{{ url_for('static', filename='chest3/best_contrast_enhanced/best_contrast_enhanced_iter_2_kernel_38x38.png') }}" alt="Modified Image 2">
+                         <p>Kernel 38x38</p>
                     </div>
                </div>
           </div>
