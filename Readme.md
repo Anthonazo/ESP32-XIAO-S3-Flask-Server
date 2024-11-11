@@ -160,7 +160,7 @@ project_root/
 
 <div style="text-align: center;">
   <h2>Imagen Medica Con Transformaciones<h2>
-  ![parte 2](https://drive.google.com/uc?export=view&id=1OwclQG9Pxjo1-iupaLAxnwW7utu9XIWQ)
+  <img src="https://drive.google.com/uc?export=view&id=1OwclQG9Pxjo1-iupaLAxnwW7utu9XIWQ" alt="parte2" width="600"/>
 </div>
 
 1. Imagen Original
