@@ -1,8 +1,13 @@
 # Proyecto Flask: Transmisión de Video con ESP32-CAM
 
+## Autores
+[Anthony Moya](https://github.com/Anthonazo)
+[Daniel Yanza](https://github.com/DanYC1503)
+
+
 ## Descripción general
 Este proyecto es una aplicación web construida con **Flask** que transmite video desde un módulo ESP32-CAM. El proyecto permite a los usuarios ver transmisiones de video en vivo, interactuar con controles de reproducción y ajustar la configuración de la cámara directamente desde una interfaz web.
-
+El trabajo cuenta con dos partes, la primera detalla la aplicacion de filtros y manipulacion de pixeles, usando operaciones en OPENCV, como sustraccion de fondo, ecualizacion, clahe, homomorfico, sal y pimienta ademas de suavizado con diferentes metodos, que tendran explicacion mas adelante, finalmente en la segunda parte se usan operaciones morfologicas para realzar el contraste de imagenes medicas. 
 
 ---
 # Descripción de los Filtros de Procesamiento en `video_capture`
@@ -17,7 +22,9 @@ La función `video_capture` incluye varios filtros y técnicas de procesamiento 
 </div>
 
 ## 2. Sustracción de fondo:
-**Modo 1**: Utiliza un sustractor de fondo (`bg_subtractor`) para resaltar objetos en movimiento, útil para detectar cambios en la escena y enfocar la atención en elementos relevantes.  
+**Modo 1**: Utiliza un sustractor de fondo (`bg_subtractor`) permite detectar elementos en movimiento al comparar cada fotograma con
+un fondo predefinido. Se utiliza el algoritmo de cv2.createBackgroundSubtractorMOG2, el cual aplica
+una estimación adaptativa del fondo, facilitando la detección de cambios en la escena.
 
 <div style="text-align: center;">
   <h2>Original<h2>
@@ -31,7 +38,9 @@ La función `video_capture` incluye varios filtros y técnicas de procesamiento 
 
 
 ## 3. Equalización de histograma:
-**Modo 2**: Aplica la equalización de histograma sobre la imagen en escala de grises para mejorar el contraste, destacando detalles en áreas subexpuestas o sobreexpuestas. 
+**Modo 2**: Aplica la equalización de histograma sobre la imagen en escala de grises para mejorar el contraste de una imagen en escala de grises distribuyendo de manera uniforme
+sus intensidades de color. La función cv2.equalizeHist se usa para incrementar el contraste, revelando
+detalles en áreas de la imagen donde los niveles de gris son similares.
 
 <div style="text-align: center;">
   <h2>Original<h2>
@@ -44,7 +53,7 @@ La función `video_capture` incluye varios filtros y técnicas de procesamiento 
 </div>
 
 ## 4. Filtro CLAHE (Contrast Limited Adaptive Histogram Equalization):
-**Modo 3**: Mejora el contraste localmente con el filtro CLAHE, que es una versión avanzada de la equalización de histograma, ideal para imágenes con variaciones de iluminación.  
+**Modo 3**: Mejora el contraste localmente con el filtro CLAHE, que es una versión avanzada de la equalización de histograma que divide la imagen en pequeñas regiones y aplica ecualización de histograma en cada una. Esto permite aumentar el contraste en áreas locales sin afectar las áreas que ya tienen buen contraste. Se usa la función cv2.createCLAHE con un límite de recorte para controlar la amplificación del contraste.
 
 <div style="text-align: center;">
   <h2>Original<h2>
@@ -56,8 +65,8 @@ La función `video_capture` incluye varios filtros y técnicas de procesamiento 
   <img src="https://drive.google.com/uc?id=1ssirIox_oDnvf90s-Zg32nB_az1j61Sn" width="600"/>
 </div>
 
-## 5. Filtro homomórfico:
-**Modo 4**: Aplica un filtro homomórfico para ajustar el brillo y mejorar los detalles en regiones de sombras o luces intensas, proporcionando una imagen más uniforme.  
+## 5. Filtro Investigado: Homomórfico :
+**Modo 4**: El filtro homomórfico es una técnica de procesamiento de imágenes que mejora el contraste y la visibilidad de detalles al reducir las variaciones de iluminación. Funciona en el dominio de frecuencia y utiliza la transformada de Fourier para separar los componentes de baja frecuencia (iluminación) y alta frecuencia (detalles). Tras convertir la imagen a una relación aditiva mediante una transformación logarítmica, se aplica un filtro paso-alto que atenúa las bajas frecuencias y resalta las altas, ayudando a reducir sombras y realzar detalles. Es especialmente útil en imágenes con iluminación no uniforme, como en radiografías, fotografía bajo condiciones difíciles y reconocimiento de texto en documentos antiguos.
 
 <div style="text-align: center;">
   <h2>Original<h2>
@@ -73,13 +82,11 @@ La función `video_capture` incluye varios filtros y técnicas de procesamiento 
 
 **Modo 5**: Este modo agrega ruido sal y pimienta a la imagen original, lo que simula interferencias en la imagen y permite evaluar la efectividad de diferentes filtros de suavizado para eliminar dicho ruido. Los filtros de suavizado aplicados son:
 
-- **Filtro de media**: Este filtro reemplaza cada píxel de la imagen con la mediana de los píxeles vecinos, lo que permite suavizar la imagen mientras preserva los bordes. Es particularmente útil para eliminar el ruido "sal y pimienta" sin afectar las estructuras lineales de la imagen.
-
+- **Filtro de mediana**: Este filtro calcula la mediana de los píxeles en una ventana de tamaño especificado, en lugar de calcular el promedio. Es ideal para reducir el ruido de sal y pimienta sin difuminar tanto los bordes de la imagen como lo hace el filtro de promedio.
 
 - **Filtro gaussiano**: Aplica un suavizado basado en una distribución gaussiana (o normal), donde los píxeles cercanos al valor central reciben más peso que los píxeles distantes. Esto ayuda a reducir el ruido general de la imagen al difuminar gradualmente los cambios abruptos en los valores de píxeles.
 
-
-- **Desenfoque simple**: Utiliza un filtro de media para suavizar la imagen. Este filtro promedia los valores de los píxeles dentro de una vecindad definida, proporcionando un suavizado simple, pero efectivo, para reducir el ruido.
+- **Filtro de la media**: Utiliza un filtro de media para suavizar la imagen. Este filtro promedia los valores de los píxeles dentro de una vecindad definida, proporcionando un suavizado simple, pero efectivo, para reducir el ruido.
 
 <div style="text-align: center;">
   <h2>Original</h2>
@@ -136,26 +143,6 @@ La detección de bordes se utiliza para resaltar las áreas en una imagen donde 
 
 Estos filtros permiten aplicar una variedad de técnicas de mejora y análisis de imágenes para obtener diferentes perspectivas de la transmisión de video en tiempo real, proporcionando a los usuarios la capacidad de observar detalles específicos o realizar análisis visuales en el flujo de video.
 
-
-## Características
-- **Transmisión de video en vivo**: Visualización en tiempo real de la transmisión del ESP32-CAM.
-- **Interfaz fácil de usar**: Diseño limpio y moderno con HTML, CSS y JavaScript.
-- **Controles interactivos**: Capacidad para iniciar/detener la transmisión, ajustar la calidad del video y capturar imágenes.
-- **Diseño responsivo**: Compatible con dispositivos de escritorio y móviles.
-
-## Estructura del proyecto
-```
-project_root/
-|-- app.py
-|-- static/
-|   |-- imgs/
-|   |-- chest1/
-|   |-- chest2/
-|   |-- chest3/
-|-- templates/
-|   |-- index.html
-|-- README.md
-```
 # Parte 2 
 
 <div style="text-align: center;">
@@ -163,9 +150,21 @@ project_root/
   <img src="https://drive.google.com/uc?export=view&id=1OwclQG9Pxjo1-iupaLAxnwW7utu9XIWQ" alt="parte2" width="1000"/>
 </div>
 
-1. Imagen Original
+En este apartado estan las operaciones morfologicas, con diferentes tamaños de kernels, entontrara la carpeta imgs que sera donde estan las imagenes que fueron procesadas y para cada imagen se realizo una nueva carpeta donde tendra el mejor resultado de la apliccion de las operaciones de realce de contraste, ademas de los filtros de tophat, blackhat, dilatacion y erosion aplicados para cada imagen.
 
-La imagen original en cada fila sirve como referencia para comparar los efectos de las transformaciones morfológicas. En este caso, se utiliza una radiografía de tórax que muestra detalles anatómicos de los pulmones y el área torácica.
+```
+project_root/
+|-- static/
+|   |-- imgs/
+|   |-- chest1/
+|   |-- |--best_contrast_enhanced/
+        |--black_hat/
+        |--contrast_enhanced/
+        |--dilation/
+        |--erosion/
+        |--top_hat/
+y asi para chest2 y chest3
+```
 
 Aplicar las operaciones morfológicas en imágenes permite realzar detalles, mejorar el contraste y destacar características importantes, especialmente en contextos como imágenes médicas. A continuación, les explicamos cada operación realizada:
 
@@ -195,6 +194,20 @@ La combinación de la imagen original con el resultado de Top Hat menos Black Ha
 - **Kernel 50x50:** Este tamaño de máscara resalta más las áreas grandes, afectando el contraste general de la imagen.
 - **Kernel 38x38:** Un tamaño intermedio que equilibra la mejora de detalles y el contraste global.
 
+## Estructura del proyecto
+```
+project_root/
+|-- app.py
+|-- static/
+|   |-- imgs/
+|   |-- chest1/
+|   |-- chest2/
+|   |-- chest3/
+|-- templates/
+|   |-- index.html
+|-- README.md
+```
+
 ## Instalación y configuración
 1. **Clonar el repositorio**:
    ```bash
@@ -202,18 +215,13 @@ La combinación de la imagen original con el resultado de Top Hat menos Black Ha
    cd esp32-cam-flask-streaming
    ```
 
-2. **Crear un entorno virtual**:
+2. **Crear un entorno virtual e instalar dependencias necesarias**:
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # En Windows usa `venv\\Scripts\\activate`
    ```
 
-3. **Instalar las dependencias**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Ejecutar la aplicación Flask**:
+3. **Ejecutar la aplicación Flask**:
    ```bash
    flask run
    ```
@@ -224,23 +232,9 @@ La combinación de la imagen original con el resultado de Top Hat menos Black Ha
 2. **Ajusta la URL de transmisión en app.py para que coincida con la dirección IP de tu ESP32-CAM.**
 3. **Accede a la interfaz web y comienza a ver la transmisión de video en vivo.**
 
-## Personalización
-
-    HTML/CSS: Modifica index.html y los estilos dentro del mismo archivo para cambios personalizados en la interfaz.
-    Configuración de la cámara: Ajusta la resolución y calidad de la cámara a través de la configuración del firmware del ESP32-CAM.
 
 ## Conclusion
 
-La función `video_capture` implementa una variedad de técnicas de procesamiento de imágenes para mejorar la visualización y el análisis de los cuadros de video en tiempo real. Al aplicar filtros como la sustracción de fondo, la equalización de histograma, el filtro CLAHE y la detección de bordes, se pueden extraer características relevantes que permiten un análisis más preciso y detallado de las escenas. Estos filtros pueden ser utilizados en una amplia gama de aplicaciones, desde la mejora de la calidad de imagen hasta la detección de movimientos y objetos en tiempo real. 
+La manipulación de píxeles y el mejoramiento de imágenes mediante técnicas avanzadas son fundamentales para resaltar detalles y mejorar la calidad visual en análisis de imágenes complejas. Al aplicar métodos como la ecualización de histograma y el filtro CLAHE (Contrast Limited Adaptive Histogram Equalization), se puede aumentar el contraste y resaltar áreas de interés, especialmente en imágenes con bajo contraste o en entornos con iluminación no uniforme. La ecualización mejora la distribución de los tonos de gris, y el CLAHE ajusta el contraste de manera local, lo cual es especialmente útil en imágenes médicas o de precisión donde es necesario controlar el contraste sin perder detalles en áreas críticas.
 
-Además, la implementación de ruido sal y pimienta, junto con los filtros de suavizado, ofrece un control sobre los efectos del ruido en las imágenes, mientras que las técnicas de detección de bordes permiten resaltar las estructuras clave dentro de la imagen, lo cual es esencial para tareas como la segmentación o el seguimiento de objetos.
-
-## Mejoras futuras
-
-Para continuar mejorando la funcionalidad y la utilidad de la función `video_capture`, se sugieren las siguientes mejoras:
-
-- **Agregar autenticación de usuario para acceso seguro**: Implementar un sistema de autenticación para restringir el acceso al procesamiento de video y garantizar que solo los usuarios autorizados puedan utilizar la herramienta. Esto podría incluir autenticación basada en contraseñas o incluso autenticación multifactor (MFA).
-
-- **Integrar funciones de grabación y reproducción de video**: Añadir la capacidad de grabar los flujos de video procesados y permitir la reproducción de los mismos para revisiones o análisis posteriores. Esto sería útil en aplicaciones como la vigilancia o el análisis de eventos históricos.
-
-- **Implementar detección de objetos basada en IA usando OpenCV**: Mejorar la capacidad de la función incorporando modelos de aprendizaje automático para la detección y clasificación de objetos en tiempo real. Esto permitiría identificar y seguir objetos específicos en el video, lo que abriría la puerta a aplicaciones avanzadas como el reconocimiento facial, la detección de vehículos o personas, y el análisis de comportamientos.
+Además, la implementación de ruido de sal y pimienta y los filtros de suavizado (como el filtro de mediana o el desenfoque gaussiano) permiten simular y gestionar la interferencia de ruido en la imagen, aumentando así la robustez del procesamiento frente a variaciones indeseadas. Técnicas avanzadas de morfología matemática, como los filtros Top-Hat y Black-Hat, son también esenciales en imágenes de alto detalle, especialmente en el ámbito médico, donde estas transformaciones ayudan a resaltar detalles específicos como estructuras y texturas en un fondo heterogéneo.
