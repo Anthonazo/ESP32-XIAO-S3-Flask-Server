@@ -3,7 +3,6 @@
 ## Descripción general
 Este proyecto es una aplicación web construida con **Flask** que transmite video desde un módulo ESP32-CAM. El proyecto permite a los usuarios ver transmisiones de video en vivo, interactuar con controles de reproducción y ajustar la configuración de la cámara directamente desde una interfaz web.
 
-Aquí tienes una explicación de los filtros utilizados en la función `video_capture` para incluir en tu README:
 
 ---
 # Descripción de los Filtros de Procesamiento en `video_capture`
