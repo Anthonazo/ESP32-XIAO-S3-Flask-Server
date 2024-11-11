@@ -156,11 +156,11 @@ project_root/
 |   |-- index.html
 |-- README.md
 ```
-#Parte 2 
+# Parte 2 
 
 <div style="text-align: center;">
   <h2>Imagen Medica Con Transformaciones<h2>
-  <img src="https://drive.google.com/uc?id=1pj9XFuFC5JkiDHNx7X4lU96ZWHy2DQPl" width="800"/>
+  <img src="https://drive.google.com/file/d/1OwclQG9Pxjo1-iupaLAxnwW7utu9XIWQ" width="800"/>
 </div>
 
 1. Imagen Original
