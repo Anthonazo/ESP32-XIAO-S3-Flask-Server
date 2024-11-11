@@ -156,6 +156,44 @@ project_root/
 |   |-- index.html
 |-- README.md
 ```
+#Parte 2 
+
+<div style="text-align: center;">
+  <h2>Imagen Medica Con Transformaciones<h2>
+  <img src="https://drive.google.com/uc?id=1pj9XFuFC5JkiDHNx7X4lU96ZWHy2DQPl" width="800"/>
+</div>
+
+1. Imagen Original
+
+La imagen original en cada fila sirve como referencia para comparar los efectos de las transformaciones morfológicas. En este caso, se utiliza una radiografía de tórax que muestra detalles anatómicos de los pulmones y el área torácica.
+
+Aplicar las operaciones morfológicas en imágenes permite realzar detalles, mejorar el contraste y destacar características importantes, especialmente en contextos como imágenes médicas. A continuación, les explicamos cada operación realizada:
+
+### a) Erosión
+La erosión es una operación morfológica que reduce el tamaño de los objetos en la imagen, "erosionando" sus bordes. Se utiliza para eliminar ruido y separar elementos cercanos. Se aplica utilizando un kernel (o máscara) que define el área de aplicación. Al aplicar una erosión con diferentes tamaños de máscaras, como una de 37x37, se puede observar cómo se reducen los detalles finos y se alisan los bordes.
+
+### b) Dilatación
+La dilatación es el proceso inverso a la erosión; expande los objetos de la imagen y rellena huecos y espacios pequeños. Esto es útil para conectar áreas disjuntas y aumentar la visibilidad de estructuras. Usar una máscara grande, como de 37x37, amplía de forma significativa las áreas brillantes y refuerza los contornos.
+
+### c) Top Hat
+La operación Top Hat resalta las áreas claras en un fondo más oscuro. Es útil para detectar pequeñas estructuras brillantes y zonas de alta intensidad.
+
+**Resultados en la imagen:** Se puede observar cómo las estructuras internas de la radiografía, como los bordes de los pulmones y la columna, se destacan al aplicar esta operación.
+
+### d) Black Hat
+La operación Black Hat resalta las áreas más oscuras en un fondo más brillante. Permite observar detalles como sombras o estructuras de baja intensidad en la imagen original.
+
+**Resultados en la imagen:**""** En cada fila, la operación muestra los contornos oscuros y zonas de bajo contraste, permitiendo identificar detalles finos que no son visibles en la imagen original.
+
+### e) Imagen Original + (Top Hat – Black Hat)
+La combinación de la imagen original con el resultado de Top Hat menos Black Hat ofrece una imagen con un contraste mejorado. Esta técnica permite destacar tanto las áreas oscuras como las claras, equilibrando la iluminación y haciendo más visibles los detalles.
+
+**Resultados en la imagen:** Las imágenes "Mejorada" muestran un balance de contraste que resalta tanto las áreas más claras como las más oscuras, logrando una visualización más nítida de las estructuras internas de la radiografía.
+
+##Tamaños de mascara utilizadas
+- **Kernel 34x34:** Permite un ajuste medio que resalta detalles sin perder demasiado contraste.
+- **Kernel 50x50:** Este tamaño de máscara resalta más las áreas grandes, afectando el contraste general de la imagen.
+- **Kernel 38x38:** Un tamaño intermedio que equilibra la mejora de detalles y el contraste global.
 
 ## Instalación y configuración
 1. **Clonar el repositorio**:
